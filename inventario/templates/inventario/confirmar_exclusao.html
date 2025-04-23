@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card p-4 text-center animate__animated animate__fadeIn">
+        <h3 class="text-white mb-4">
+            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+            Tem certeza que deseja excluir este servidor?
+        </h3>
+
+        <div class="mb-4 text-start text-white">
+            <p><strong>Hostname:</strong> {{ object.hostname }}</p>
+            <p><strong>IP:</strong> {{ object.ip }}</p>
+            <p><strong>Sistema Operacional:</strong> {{ object.sistema_operacional }}</p>
+            {% if object.descricao %}
+                <p><strong>Descrição:</strong> {{ object.descricao }}</p>
+            {% endif %}
+        </div>
+
+        <form method="post" class="d-flex justify-content-center gap-3">
+            {% csrf_token %}
+            <a href="{% url 'lista_servidores' %}" class="btn btn-outline-light">
+                <i class="bi bi-arrow-left-circle me-1"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash-fill me-1"></i> Excluir
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Servidores{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white"></h2>
+        <a href="{% url 'criar_servidor' %}" class="btn btn-primary">+ Novo Servidor</a>
+    </div>
+
+    <!-- Filtro de busca e ordenação -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-6">
+            <input type="text" name="busca" class="form-control" placeholder="Buscar por hostname..." value="{{ request.GET.busca }}">
+        </div>
+        <div class="col-md-4">
+            <select name="ordenar" class="form-select">
+                <option value="">Ordenar por...</option>
+                <option value="hostname" {% if request.GET.ordenar == "hostname" %}selected{% endif %}>Hostname</option>
+                <option value="ip" {% if request.GET.ordenar == "ip" %}selected{% endif %}>IP</option>
+                <option value="sistema_operacional" {% if request.GET.ordenar == "sistema_operacional" %}selected{% endif %}>Sistema Operacional</option>
+                <option value="status" {% if request.GET.ordenar == "status" %}selected{% endif %}>Status</option>
+                <option value="localizacao" {% if request.GET.ordenar == "localizacao" %}selected{% endif %}>Localização</option>
+                <option value="backup" {% if request.GET.ordenar == "backup" %}selected{% endif %}>Backup</option>
+                <option value="update" {% if request.GET.ordenar == "update" %}selected{% endif %}>Update</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-light w-100">Filtrar</button>
+        </div>
+    </form>
+
+    {% if servidores %}
+        <div class="table-responsive">
+            <table class="table table-dark table-hover table-bordered rounded">
+                <thead class="table-secondary text-dark">
+                    <tr>
+                        <th>Hostname</th>
+                        <th>IP</th>
+                        <th>Sistema Operacional</th>
+                        <th>Status</th>
+                        <th>Localização</th>
+                        <th>Backup</th>
+                        <th>Update</th>
+                        <th>Descrição</th>
+                        <th style="width: 160px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servidor in servidores %}
+                    <tr>
+                        <td>{{ servidor.hostname }}</td>
+                        <td>{{ servidor.ip }}</td>
+                        <td>{{ servidor.sistema_operacional }}</td>
+                        <td>{{ servidor.status }}</td>
+                        <td>{{ servidor.localizacao }}</td>
+                        <td>
+                            {{ servidor.backup }}
+                            {% if servidor.backup == "Sem Backup" and servidor.status == "Ativo" %}
+                                <i class="bi bi-exclamation-triangle-fill text-danger ms-2" title="Servidor sem backup!"></i>
+                            {% endif %}
+                        </td>                        
+                        <td>
+                            {{ servidor.update }}
+                            {% if servidor.sistema_operacional|lower >= 'windows server 2022'|lower and servidor.update == "Sem Update" %}
+                                <i class="bi bi-exclamation-triangle-fill text-danger ms-2" title="Servidor sem update!"></i>
+                            {% endif %}
+                        </td>                        
+                        <td>
+                            {% if servidor.observacoes %}
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#descricaoModal{{ servidor.id }}">
+                                    {{ servidor.observacoes|slice:":16" }}...
+                                </a>
+                                <!-- Modal -->
+                                <div class="modal fade" id="descricaoModal{{ servidor.id }}" tabindex="-1" aria-labelledby="descricaoModalLabel{{ servidor.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable">
+                                        <div class="modal-content" style="background-color: #343541; color: #e6e6e6; border-radius: 12px;">
+                                            <div class="modal-header border-0">
+                                                <h5 class="modal-title" id="descricaoModalLabel{{ servidor.id }}">Descrição Completa</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                            </div>
+                                            <div class="modal-body" style="border-top: 1px solid #444;">
+                                                {{ servidor.observacoes }}
+                                            </div>
+                                            <div class="modal-footer border-0">
+                                                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Fechar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">(sem descrição)</span>
+                            {% endif %}
+                        </td>                        
+                        <td>
+                            <a href="{% url 'editar_servidor' servidor.id %}" class="btn btn-sm btn-outline-warning me-1">Editar</a>
+                            <a href="{% url 'deletar_servidor' servidor.id %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-secondary text-center mt-4">
+            Nenhum servidor encontrado.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
